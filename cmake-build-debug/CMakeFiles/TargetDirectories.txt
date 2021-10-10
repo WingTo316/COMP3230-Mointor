@@ -1,0 +1,3 @@
+/mnt/c/Users/wingk/CLionProjects/COMP3230-Mointor/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/wingk/CLionProjects/COMP3230-Mointor/cmake-build-debug/CMakeFiles/edit_cache.dir
+/mnt/c/Users/wingk/CLionProjects/COMP3230-Mointor/cmake-build-debug/CMakeFiles/COMP3230_Mointor.dir

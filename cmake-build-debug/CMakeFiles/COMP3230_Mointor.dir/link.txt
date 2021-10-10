@@ -1,0 +1,1 @@
+/usr/bin/cc -g   CMakeFiles/COMP3230_Mointor.dir/monitor.c.o  -o COMP3230_Mointor 
