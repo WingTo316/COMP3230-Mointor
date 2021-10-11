@@ -71,6 +71,7 @@ int main(int argc, char* argv[]) {
     struct rusage state;
     int wstatus;
     struct timeval start, end;
+
     for (int i=0; i<num_of_cmd; i++) {
         pids[i] = start_process(arg_vector[i], &start);
         printf("\nProcess with id: %d created for the command: %s\n", pids[i], arg_vector[i][0]);
