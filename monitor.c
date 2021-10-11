@@ -9,14 +9,19 @@
 #include <sys/wait.h>
 #include <sys/resource.h>
 #include <sys/time.h>
+#include <signal.h>
 
 pid_t start_process(char**, struct timeval*);
 
 void statistics(struct rusage, struct timeval, struct timeval);
 
+void sighandler(int);
+
 int main(int argc, char* argv[]) {
 
     if (argc == 1) { exit(0); } // if no arg
+
+    signal(SIGINT,sighandler);
 
     int num_of_cmd = 1;
 
@@ -71,7 +76,13 @@ int main(int argc, char* argv[]) {
         printf("\nProcess with id: %d created for the command: %s\n", pids[i], arg_vector[i][0]);
         wait4(pids[i], &wstatus, 0, &state);
         gettimeofday(&end, NULL);
-        printf("The command \"%s\" terminated with returned status code = %d\n\n", arg_vector[i][0], WEXITSTATUS(wstatus));
+
+        if (WIFEXITED(wstatus))
+            printf("The command \"%s\" terminated with returned status code = %d\n\n", arg_vector[i][0], WEXITSTATUS(wstatus));
+        if (WIFSIGNALED(wstatus))
+            printf("The command \"%s\" is interrupted by the signal number = %d (%s)\n\n",
+                   arg_vector[i][0], WTERMSIG(wstatus), strsignal(WTERMSIG(wstatus)));
+
         statistics(state, start, end);
     }
 
@@ -107,3 +118,5 @@ void statistics(struct rusage usage, struct timeval start, struct timeval end) {
     printf("no. of page faults: %ld\n", usage.ru_minflt + usage.ru_majflt);
     printf("no. of context switches: %ld\n", usage.ru_nvcsw + usage.ru_nivcsw);
 }
+
+void sighandler(int signum) { return; }
