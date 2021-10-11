@@ -1,7 +1,3 @@
-//
-// Created by wingk on 10/10/2021.
-//
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,8 +6,6 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <signal.h>
-
-pid_t start_process(char**, struct timeval*);
 
 pid_t pipe_process(char**, struct timeval*, int, int, int*);
 
@@ -68,20 +62,16 @@ int main(int argc, char* argv[]) {
     for (int i=0; i<num_of_cmd-1; i++)
         pipe(&pipefd[2*i]);
 
-    pid_t* pids = (pid_t*) malloc(num_of_cmd * sizeof(pid_t));
+    pid_t pid;
     struct rusage state;
     int wstatus;
     struct timeval start, end;
 
     for (int i=0; i<num_of_cmd; i++) {
-        if (num_of_cmd == 1) {
-            pids[i] = start_process(arg_vector[i], &start);
-        } else {
-            pids[i] = pipe_process(arg_vector[i], &start, i, num_of_cmd, pipefd);
-        }
-        printf("\nProcess with id: %d created for the command: %s\n", pids[i], arg_vector[i][0]);
+        pid = pipe_process(arg_vector[i], &start, i, num_of_cmd, pipefd);
+        printf("\nProcess with id: %d created for the command: %s\n", pid, arg_vector[i][0]);
 
-        wait4(pids[i], &wstatus, 0, &state);
+        wait4(pid, &wstatus, 0, &state);
         gettimeofday(&end, NULL);
 
         if (WIFEXITED(wstatus))
@@ -92,27 +82,7 @@ int main(int argc, char* argv[]) {
 
         statistics(state, start, end);
     }
-
     return 0;
-}
-
-pid_t start_process(char** arg, struct timeval* start) {
-    gettimeofday(start, NULL);
-    pid_t pid = fork();
-    if (pid == -1) {
-        printf("fork() error!\n");
-        exit(-1);
-    } else if (pid == 0) {
-        if (arg[0][0] == '/') {
-            execv(arg[0], arg);
-        } else {
-            execvp(arg[0], arg);
-        }
-        printf("exec: : No such file or directory\n");
-        printf("monitor experienced an error in starting the command: %s\n", arg[0]);
-        exit(-1);
-    }
-    return pid;
 }
 
 pid_t pipe_process(char** arg, struct timeval* start, int index, int num_of_cmd, int* pipefd) {
