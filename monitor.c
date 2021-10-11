@@ -65,9 +65,8 @@ int main(int argc, char* argv[]) {
     }
 
     int* pipefd = (int*) malloc(2 * (num_of_cmd-1) * sizeof(int));
-    for (int i=0; i<num_of_cmd-1; i++) {
+    for (int i=0; i<num_of_cmd-1; i++)
         pipe(&pipefd[2*i]);
-    }
 
     pid_t* pids = (pid_t*) malloc(num_of_cmd * sizeof(pid_t));
     struct rusage state;
@@ -138,10 +137,10 @@ pid_t pipe_process(char** arg, struct timeval* start, int index, int num_of_cmd,
         printf("monitor experienced an error in starting the command: %s\n", arg[0]);
         exit(-1);
     }
-    if (index == num_of_cmd-1) {
-        for (int i=0; i<2*(num_of_cmd-1); i++)
-            close(pipefd[i]);
-    }
+    if (index != 0)
+        close(pipefd[2*index-2]);
+    if (index != num_of_cmd-1)
+        close(pipefd[2*index+1]);
     return pid;
 }
 
