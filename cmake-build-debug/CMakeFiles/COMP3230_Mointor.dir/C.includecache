@@ -13,4 +13,14 @@ stdlib.h
 -
 string.h
 -
+unistd.h
+-
+sys/wait.h
+-
+sys/resource.h
+-
+sys/time.h
+-
+signal.h
+-
 

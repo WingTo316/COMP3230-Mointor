@@ -13,6 +13,8 @@
 
 pid_t start_process(char**, struct timeval*);
 
+pid_t pipe_process(char**, struct timeval*, int, int, int*);
+
 void statistics(struct rusage, struct timeval, struct timeval);
 
 void sighandler(int);
@@ -62,7 +64,7 @@ int main(int argc, char* argv[]) {
         tmp_len++;
     }
 
-    int* pipefd = (int*) malloc((num_of_cmd-1) * sizeof(int));
+    int* pipefd = (int*) malloc(2 * (num_of_cmd-1) * sizeof(int));
     for (int i=0; i<num_of_cmd-1; i++) {
         pipe(&pipefd[2*i]);
     }
@@ -73,8 +75,13 @@ int main(int argc, char* argv[]) {
     struct timeval start, end;
 
     for (int i=0; i<num_of_cmd; i++) {
-        pids[i] = start_process(arg_vector[i], &start);
+        if (num_of_cmd == 1) {
+            pids[i] = start_process(arg_vector[i], &start);
+        } else {
+            pids[i] = pipe_process(arg_vector[i], &start, i, num_of_cmd, pipefd);
+        }
         printf("\nProcess with id: %d created for the command: %s\n", pids[i], arg_vector[i][0]);
+
         wait4(pids[i], &wstatus, 0, &state);
         gettimeofday(&end, NULL);
 
@@ -105,6 +112,35 @@ pid_t start_process(char** arg, struct timeval* start) {
         printf("exec: : No such file or directory\n");
         printf("monitor experienced an error in starting the command: %s\n", arg[0]);
         exit(-1);
+    }
+    return pid;
+}
+
+pid_t pipe_process(char** arg, struct timeval* start, int index, int num_of_cmd, int* pipefd) {
+    gettimeofday(start, NULL);
+    pid_t pid = fork();
+    if (pid == -1) {
+        printf("fork() error!\n");
+        exit(-1);
+    } else if (pid == 0) {
+        if (index != 0)
+            dup2(pipefd[2*index-2], 0);
+        if (index != num_of_cmd-1)
+            dup2(pipefd[2*index+1], 1);
+        for (int i=0; i<2*(num_of_cmd-1); i++)
+            close(pipefd[i]);
+        if (arg[0][0] == '/') {
+            execv(arg[0], arg);
+        } else {
+            execvp(arg[0], arg);
+        }
+        printf("exec: : No such file or directory\n");
+        printf("monitor experienced an error in starting the command: %s\n", arg[0]);
+        exit(-1);
+    }
+    if (index == num_of_cmd-1) {
+        for (int i=0; i<2*(num_of_cmd-1); i++)
+            close(pipefd[i]);
     }
     return pid;
 }
