@@ -1,3 +1,19 @@
+// Filename:        monitor_3035692072.c
+// Student name:    To Wing Kwong
+// Student UID:     3035692072
+// Platform:        wsl2 (WIN11)
+
+// Remark:
+//      1. tested with absolute path
+//      2. tested with relative path
+//      3. tested with environment variable
+//      4. implement new child process message
+//      5. implement exec error message
+//      6. implement process’s running statistics message
+//      7. implement child terminated by signal message
+//      8. implement ignore SIGINT of monitor process
+//      9. implement pipe
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -109,8 +125,8 @@ pid_t pipe_process(char** arg, struct timeval* start, int index, int num_of_cmd,
         else // relative path
             execvp(arg[0], arg);
 
-        printf("exec: : No such file or directory\n");
-        printf("monitor experienced an error in starting the command: %s\n", arg[0]);
+        perror("exec: ");
+        printf("\nmonitor experienced an error in starting the command: %s\n\n", arg[0]);
         exit(-1);
     }
     // for father process, close used pipe end
