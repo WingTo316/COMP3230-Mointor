@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
     // 3D array store i-th program j-th argument at arg_vector[i][j]
     char*** arg_vector = (char***) malloc(num_of_cmd * sizeof(char**));
     for (int i=0; i<num_of_cmd; i++)
-        arg_vector[i] = (char**) malloc(num_of_cmd * sizeof(char*));
+        arg_vector[i] = (char**) malloc((cmd_len[i]+1) * sizeof(char*));
 
     // load argument to arg_vector[][][]
     tmp_len = 0;
